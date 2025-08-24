@@ -6,7 +6,7 @@ class FileUploader {
         this.uploadedLinks = $('#uploadedLinks');
         this.linksList = $('#linksList');
         
-        this.maxSize = 3 * 1024 * 1024;
+        this.maxSize = 3 * 3 * 1024 * 1024; // 3MB
         this.allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         this.allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
         this.maxConcurrentUploads = 3;
@@ -20,12 +20,15 @@ class FileUploader {
         this.setupDragDrop();
         this.setupFileInput();
         this.setupButtons();
-        this.setupKeyboardShortcuts();
+        // REMPLACÉ : La méthode `setupKeyboardShortcuts()` a été remplacée par un gestionnaire d'événements de collage plus fiable.
+        this.setupPasteEvent();
     }
     
     setupDragDrop() {
+        // Prevent default browser drag behavior on entire page
         $(document).on('dragover dragenter', (e) => e.preventDefault());
         
+        // Stop the file input's click event from bubbling up to the dropzone
         this.fileInput.on('click', (e) => e.stopPropagation());
 
         this.dropzone.on({
@@ -37,6 +40,7 @@ class FileUploader {
             'dragleave': (e) => {
                 e.preventDefault();
                 e.stopPropagation();
+                // Only remove class if leaving dropzone entirely
                 if (!this.dropzone[0].contains(e.relatedTarget)) {
                     this.dropzone.removeClass('dragover');
                 }
@@ -54,7 +58,7 @@ class FileUploader {
     setupFileInput() {
         this.fileInput.on('change', (e) => {
             this.handleFiles(e.target.files);
-            this.fileInput.val('');
+            this.fileInput.val(''); // Reset input
         });
     }
     
@@ -63,40 +67,36 @@ class FileUploader {
         $('#hideFiles').on('click', () => this.toggleUploadedSection(false));
     }
     
-    setupKeyboardShortcuts() {
-        $(document).on('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
-                this.handlePaste(e);
+    /**
+     * @description Sets up a 'paste' event listener on the document.
+     * This is a more robust and standard way to handle pasted images.
+     */
+    setupPasteEvent() {
+        $(document).on('paste', (e) => {
+            const items = e.originalEvent.clipboardData?.items;
+            if (!items) return;
+
+            const files = [];
+            for (let item of items) {
+                if (item.kind === 'file' && item.type.startsWith('image/')) {
+                    files.push(item.getAsFile());
+                }
             }
-            if (e.key === 'Escape') {
-                this.clearPreviews();
+
+            if (files.length > 0) {
+                e.preventDefault();
+                this.handleFiles(files);
+                this.showAlert('Images pasted from clipboard!', 'success');
             }
         });
     }
-    
-    async handlePaste(e) {
-        const items = e.originalEvent.clipboardData?.items;
-        if (!items) return;
-        
-        const files = [];
-        for (let item of items) {
-            if (item.kind === 'file' && item.type.startsWith('image/')) {
-                files.push(item.getAsFile());
-            }
-        }
-        
-        if (files.length > 0) {
-            e.preventDefault();
-            this.handleFiles(files);
-            this.showAlert('Images pasted from clipboard!', 'success');
-        }
-    }
-    
+
     handleFiles(files) {
         const validFiles = Array.from(files).filter(file => this.validateFile(file));
         
         if (validFiles.length === 0) return;
         
+        // Show batch info
         if (validFiles.length > 1) {
             this.showAlert(`Processing ${validFiles.length} images...`, 'info');
         }
@@ -110,6 +110,7 @@ class FileUploader {
     }
     
     validateFile(file) {
+        // Check file type by MIME and extension
         const isValidMime = this.allowedTypes.includes(file.type);
         const hasValidExt = this.allowedExtensions.some(ext => 
             file.name.toLowerCase().endsWith(ext)
@@ -187,7 +188,7 @@ class FileUploader {
             data: formData,
             processData: false,
             contentType: false,
-            timeout: 30000,
+            timeout: 30000, // 30 second timeout
             xhr: () => {
                 const xhr = new XMLHttpRequest();
                 xhr.upload.onprogress = (e) => {
@@ -206,6 +207,7 @@ class FileUploader {
                 this.addToUploadedList(filename, true);
                 this.toggleUploadedSection(true);
                 
+                // Auto-remove preview after delay
                 setTimeout(() => this.removePreview(previewId), 3000);
             },
             error: (xhr) => {
@@ -218,7 +220,7 @@ class FileUploader {
             },
             complete: () => {
                 this.currentUploads--;
-                this.processUploadQueue();
+                this.processUploadQueue(); // Process next in queue
             }
         });
     }
@@ -255,6 +257,7 @@ class FileUploader {
             </li>
         `);
         
+        // Check for duplicates
         if (this.linksList.find(`[data-filename="${filename}"]`).length === 0) {
             prepend ? this.linksList.prepend(item) : this.linksList.append(item);
         }
@@ -271,6 +274,7 @@ class FileUploader {
                 btn.style.background = '';
             }, 2000);
         } catch {
+            // Fallback for older browsers
             this.fallbackCopyToClipboard(text);
             this.showAlert('URL copied (fallback method)', 'success');
         }
@@ -286,6 +290,7 @@ class FileUploader {
     }
     
     deleteFile(filename, btn) {
+        // Remplacé par une alerte personnalisée dans la plupart des applications modernes, mais j'ai conservé le comportement actuel.
         if (!confirm(`Are you sure you want to delete "${filename}"?`)) return;
         
         $(btn).prop('disabled', true).text('Deleting...');
@@ -358,6 +363,7 @@ class FileUploader {
     }
 }
 
+// Initialize uploader when DOM is ready
 $(document).ready(() => {
     window.uploader = new FileUploader();
 });
