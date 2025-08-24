@@ -1,7 +1,8 @@
 # Image Uploader
 
 A simple and lightweight web application for uploading and managing image files via a modern, drag-and-drop interface.
-Purpose and Features
+
+# Purpose and Features
 
 This project provides a straightforward, user-friendly solution for uploading images to a server. Its core value lies in its simplicity and efficiency, making it ideal for personal use, small projects, or as a component in a larger application.
 
