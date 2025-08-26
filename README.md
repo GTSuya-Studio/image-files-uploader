@@ -1,4 +1,4 @@
-# Image Uploader
+# Image File Uploader
 
 A simple and lightweight web application for uploading and managing image files via a modern, drag-and-drop interface.
 
