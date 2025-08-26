@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Image Files Uploader</title>
   <link href="assets/css/bootstrap.min.css" rel="stylesheet">
-  <link href="assets/css/style.css<?php echo '?'.mt_rand(); ?>" rel="stylesheet">
+  <link href="assets/css/style.css" rel="stylesheet">
 </head>
 <body>
 <div class="container mt-4">
@@ -30,6 +30,6 @@
 </div>
 
 <script src="assets/js/jquery-3.4.1.min.js"></script>
-<script src="assets/js/script.js<?php echo '?'.mt_rand(); ?>"></script>
+<script src="assets/js/script.js"></script>
 </body>
 </html>
