@@ -27,7 +27,7 @@ To get this project running, you will need a web server with PHP support (like A
 
 ### Clone the Repository:
 
-  *git clone https://github.com/your-username/your-repository.git*
+  *git clone https://github.com/GTSuya-Studio/image-files-uploader.git*
   *cd your-repository*
 
   (Remember to replace your-username/your-repository with your actual repository path).
